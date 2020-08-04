@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -17,10 +17,12 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
-// import { Editor } from '@tinymce/tinymce-react';
-import CustomTable from "../../organism/CustomTable";
+import { Editor } from '@tinymce/tinymce-react';
+// import CustomTable from "../../organism/CustomTable";
+import { firestore } from "../../../config/firebase";
 
 import { router } from '../../../config/router';
+import { Button, TextField } from '@material-ui/core';
 
 
 const drawerWidth = 240;
@@ -87,7 +89,9 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function DashboardTemplate() {
   const classes = useStyles();
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState<string>('');
+  const [body, setBody] = useState<string>('');
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -96,6 +100,16 @@ export default function DashboardTemplate() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const saveToFirestore = async () => {
+    await firestore.collection('posts').add({
+      title,
+      body
+    });
+
+    setTitle('')
+    setBody('')
+  }
 
   return (
     <div className={classes.root}>
@@ -160,9 +174,17 @@ export default function DashboardTemplate() {
         })}
       >
         <div className={classes.drawerHeader} />
-        {/* <Editor
+
+        <TextField
+          id="outline-basic"
+          label="Title"
+          variant="outlined"
+          style={{ width: '100%', marginBottom: 10 }}
+          value={title}
+          onChange={e => setTitle(e.target.value)} />
+        <Editor
           apiKey="wll1c7bb5haxhucf4zvvo1gk6wrsbjphjhijlptem3vbioqi"
-          initialValue="<p>Initial content</p>"
+          value={body}
           init={{
             height: 500,
             menubar: 'file edit view insert format tools table tc help',
@@ -174,14 +196,12 @@ export default function DashboardTemplate() {
             ],
             toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
           }}
-          onChange={(e: any) => {
-            console.log(
-              'Content was updated:',
-              e.target.getContent()
-            );
-          }}
-        /> */}
-        <CustomTable />
+          onChange={(e: any) => setBody(e.target.getContent())}
+        />
+        {/* <CustomTable /> */}
+
+        <Button onClick={saveToFirestore} variant="contained" style={{ marginTop: 10 }} color="primary" >Save</Button>
+
       </main>
     </div>
   );
