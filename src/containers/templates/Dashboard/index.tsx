@@ -17,14 +17,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
-// import { Editor } from '@tinymce/tinymce-react';
-import CustomTable from "../../organism/CustomTable";
-// import { firestore } from "../../../config/firebase";
-
 import { router } from '../../../config/router';
-// import { Button, TextField } from '@material-ui/core';
-
-
+import { NavLink, Route } from 'react-router-dom';
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -86,12 +80,15 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+const renderRouter = () => {
+  return router.filter(route => route.template === "dashboard")
+    .map(route => <Route key={route.path} component={route.component} path={`/${route.template}${route.path}`} />)
+}
+
 export default function DashboardTemplate() {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState<string>('');
-  const [body, setBody] = useState<string>('');
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -100,16 +97,6 @@ export default function DashboardTemplate() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-
-  const saveToFirestore = async () => {
-    // await firestore.collection('posts').add({
-    //   title,
-    //   body
-    // });
-
-    setTitle('')
-    setBody('')
-  }
 
   return (
     <div className={classes.root}>
@@ -131,7 +118,7 @@ export default function DashboardTemplate() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            Thiago Dashboard
+            Firebase Post Experiment Dashboard
           </Typography>
         </Toolbar>
       </AppBar>
@@ -151,22 +138,20 @@ export default function DashboardTemplate() {
         </div>
         <Divider />
         <List>
-          {router.map((text, index) => (
-            <ListItem button key={text.label}>
+          {router.map((route, index) => (
+            <ListItem
+              button
+              key={route.label}
+              component={NavLink}
+              to={`/${route.template}${route.path}`}
+              activeStyle={{ backgroundColor: "#d8d8d8" } //Transform ListItem in NavLink with inherit props
+              }>
               <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text.label} />
+              <ListItemText primary={route.label} />
             </ListItem>
           ))}
         </List>
         <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
       </Drawer>
       <main
         className={clsx(classes.content, {
@@ -174,34 +159,7 @@ export default function DashboardTemplate() {
         })}
       >
         <div className={classes.drawerHeader} />
-
-        {/*        <TextField
-          id="outline-basic"
-          label="Title"
-          variant="outlined"
-          style={{ width: '100%', marginBottom: 10 }}
-          value={title}
-          onChange={e => setTitle(e.target.value)} /> */}
-        {/* <Editor
-          apiKey="wll1c7bb5haxhucf4zvvo1gk6wrsbjphjhijlptem3vbioqi"
-          value={body}
-          init={{
-            height: 500,
-            menubar: 'file edit view insert format tools table tc help',
-            plugins: [
-              'advlist autolink lists link image',
-              'charmap print preview anchor help',
-              'searchreplace visualblocks code',
-              'insertdatetime media table paste wordcount'
-            ],
-            toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
-          }}
-          onChange={(e: any) => setBody(e.target.getContent())}
-        /> */}
-        <CustomTable />
-
-        {/* <Button onClick={saveToFirestore} variant="contained" style={{ marginTop: 10 }} color="primary" >Save</Button> */}
-
+        {renderRouter()}
       </main>
     </div>
   );

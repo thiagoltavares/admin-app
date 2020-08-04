@@ -14,35 +14,16 @@ import {
   Button,
   Grid,
 } from "@material-ui/core";
-
 import {
-  Delete as DeleteIcon,
   Search as SearchIcon,
+  Delete as DeleteIcon,
+  NoteAdd as NoteAddIcon,
 } from "@material-ui/icons";
-
 import Swal from "sweetalert2";
-
 import { PostConverter } from "../../../utils/firebasePostConverter";
 import { firestore } from '../../../config/firebase';
-
 import IPost from "../../../interfaces/IPost";
-
-
-interface Column {
-  id: 'name' | 'code' | 'population' | 'size' | 'density';
-  label: string;
-  minWidth?: number;
-  align?: 'right';
-  format?: (value: number) => string;
-}
-
-interface Data {
-  name: string;
-  code: string;
-  population: number;
-  size: number;
-  density: number;
-}
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -75,7 +56,9 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-export default function CustomTable() {
+let unsubscribe: any;
+
+export default function PostList() {
   const classes = useStyles();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -115,7 +98,7 @@ export default function CustomTable() {
 
   useEffect(() => {
     const getDataFromFirestore = () => {
-      firestore.collection('posts').withConverter(PostConverter).onSnapshot(docs => {
+      unsubscribe = firestore.collection('posts').withConverter(PostConverter).onSnapshot(docs => {
         let data: IPost[] = [];
         docs.forEach(doc => {
           data.push({ ...doc.data(), id: doc.id })
@@ -123,8 +106,10 @@ export default function CustomTable() {
         setPosts(data)
       });
     };
-
     getDataFromFirestore();
+    return () => {
+      unsubscribe()
+    }
   }, []);
 
   return (
@@ -145,14 +130,16 @@ export default function CustomTable() {
           </Paper>
         </Grid>
         <Grid xs={12} sm={6} container justify="flex-end" item>
-          <Button
-            variant="contained"
-            color="secondary"
-            className={classes.button}
-            startIcon={<DeleteIcon />}
-          >
-            Delete
+          <Link to="/dashboard/posts/create" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.button}
+              startIcon={<NoteAddIcon />}
+            >
+              Create Post
         </Button>
+          </Link>
         </Grid>
       </Grid>
       <Paper className={classes.root}>
