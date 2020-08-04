@@ -7,7 +7,7 @@ interface MyComponentProps {
 const MyComponent: React.FC<MyComponentProps> = ({ title }) => {
   return (
     <div>
-      <p>Component {title}</p>
+      <p>Component 1</p>
     </div>
   )
 }
